@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style>
+td {
+	width: 80px;
+	height: 35px;
+	border: 1px solid #0017B5;
+	text-align: center;
+	font-size: 13px;
+}
+</style>
+<script src="js/jquery.min.js"></script>
+</head>
+<body>
+
+<table onclick="toInput(event)" style="border-collapse: collapse">
+<tr>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
+<tr>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
+</table>
+
+</body>
+<script>
+	//单元格点击事件
+	function toInput(e) {
+		var obj = e.target || e.srcElement;
+		var td = $(obj);
+		tdWrite(td);
+	}
+	
+	//单元格变成可输入
+	function tdWrite(td) {
+		td.html("<input class='tdinput' style='width:100%;height:100%;border:0px;' onblur='inputComplete(this)' value=" + td.text() + ">");
+		td.find("input").first().focus();  //获取输入焦点
+		
+		//输入框绑定回车事件
+		$(".tdinput").each(function() {
+			this.onkeyup = function(e) {
+				var code = e.charCode || e.keyCode;
+				if (code == 13) {
+					//移到下一格
+					var nextTd = $(this).parent().next().length!=0?
+									$(this).parent().next()
+									: $(this).parent().parent().next().find("td").first();
+					if (nextTd.length == 0) {
+						inputComplete(this);
+						return ;
+					}
+					tdWrite(nextTd);
+					inputComplete(this);
+				}
+			}
+		});
+	}
+	
+	//完成输入后将输入框内容写入表格
+	function inputComplete(i) {
+		getPosition(i);
+		$(i).parent().html(i.value);
+	}
+	
+	var first = true;
+	//显示行列
+	function getPosition(i) {
+		if (first) {
+			let rows = $(i).parent().parent().prevAll().length + 1;
+			let cols = $(i).parent().prevAll().length + 1;
+			console.log("行: " + rows + "列: " + cols);
+			first = false;
+		} else {
+			first = true;
+		}
+	}
+</script>
+</html>

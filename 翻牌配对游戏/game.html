@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>配对游戏</title>
+<style type="text/css">
+	#panel {
+		width: 680px;
+		height: 460px;
+		border: 1px solid gray;
+		margin: 300px auto;
+		background-repeat: no-repeat;
+	}
+	
+	.block {
+		width: 200px;
+		height: 200px;
+		background-color: green;
+		float: left;
+		margin-left: 20px;
+		margin-top: 20px;
+	}
+</style>
+</head>
+<body>
+	<p id="hint" style="float: left; color: #EE0000"></p>
+	<div id="panel">
+		<div class="block"></div>
+		<div class="block"></div>
+		<div class="block"></div>
+		<div class="block"></div>
+		<div class="block"></div>
+		<div class="block"></div>
+	</div>
+</body>
+<script>
+	var blockPic = [0, 0, 0, 0, 0, 0];  //保存每个格子的图片index
+	var index;
+	var flipNum = 0;  //已翻开的数量
+	var lastFilppedBlock;  //上一次翻开的牌
+	var isPlaying = true;
+	
+	window.onload = function() {
+		var blocks = document.querySelectorAll(".block");
+		
+		var indexFlag = [0, 0, 0];
+		for (let i = 0; i < blocks.length; i++) {
+			while (true) {
+				index = parseInt(Math.random()*3);  //随机生成0,1,2,对应3张图片文件名
+				indexFlag[index]++;
+				if (indexFlag[index] <= 2) {  //每个图案需出现2次
+					break;
+				}
+			}
+			
+			blockPic[i] = index;
+		}
+		
+		for (let i = 0; i < blocks.length; i++) {
+			blocks[i].index = i;
+			blocks[i].onclick = function() {  //为每张牌绑定单击事件
+				if (isPlaying) {
+					flipNum++;
+					blocks[this.index].style.background = "url(" + blockPic[this.index] + ".png)";  //点击翻开(即设置一张背景图片)
+					if (flipNum % 2 == 0) {  //每翻开2张就对比一下图案是否相同
+						if (lastFilppedBlock.style.background != blocks[this.index].style.background) {  //两张牌不同牌面,翻回去(取消背景)
+							blocks[this.index].style.background = "";
+							lastFilppedBlock.style.background = "";
+							flipNum -= 2;
+						} else if (flipNum == 6) {  //全部牌翻开,游戏结束
+							isPlaying = false;
+							document.querySelector("#hint").blockHTML = 'Congratulations!';
+						}
+					}
+					lastFilppedBlock = blocks[this.index];
+				}
+			};
+		}
+	};
+</script>
+</html>
