@@ -16,7 +16,7 @@ td {
 </head>
 <body>
 
-<table onclick="toInput(event)" style="border-collapse: collapse">
+<table id="mytable" onclick="toInput(event)" style="border-collapse: collapse">
 <tr>
 	<td></td>
 	<td></td>
@@ -29,57 +29,123 @@ td {
 </tr>
 </table>
 
+<p id="showPos"></p>  <!-- 光标移入时显示当前位置 -->
+<p id="showModifyPos" style="color: red;"></p>  <!-- 编辑时显示当前编辑位置 -->
+
 </body>
 <script>
 	//单元格点击事件
 	function toInput(e) {
+		e.stopPropagation();
 		var obj = e.target || e.srcElement;
+		if (obj.tagName.toUpperCase() != 'TD') {
+			return ;
+		}
 		var td = $(obj);
 		tdWrite(td);
 	}
 	
 	//单元格变成可输入
 	function tdWrite(td) {
-		td.html("<input class='tdinput' style='width:100%;height:100%;border:0px;' onblur='inputComplete(this)' value=" + td.text() + ">");
+		td.html("<input class='tdinput' style='width:100%;height:100%;border:0px;' oninput='getModifyPosition(this)' onblur='inputComplete(this)' value=" + td.text() + ">");
 		td.find("input").first().focus();  //获取输入焦点
+		getPosition(td.find("input").first());
 		
 		//输入框绑定回车事件
 		$(".tdinput").each(function() {
 			this.onkeyup = function(e) {
+				e.stopPropagation();
 				var code = e.charCode || e.keyCode;
-				if (code == 13) {
-					//移到下一格
-					var nextTd = $(this).parent().next().length!=0?
-									$(this).parent().next()
-									: $(this).parent().parent().next().find("td").first();
-					if (nextTd.length == 0) {
-						inputComplete(this);
-						return ;
-					}
-					tdWrite(nextTd);
+				if (code == 13 || code == 39) {  //回车或 →
+					moveRight(this);
+					inputComplete(this);
+				} else if (code == 37) {  //←
+					moveLeft(this);
+					inputComplete(this);
+				} else if (code == 38) {  //↑
+					moveUp(this);
+					inputComplete(this);
+				} else if (code == 40) {  //↓
+					moveDown(this);
 					inputComplete(this);
 				}
 			}
 		});
 	}
 	
-	//完成输入后将输入框内容写入表格
-	function inputComplete(i) {
-		getPosition(i);
-		$(i).parent().html(i.value);
+	//移到上面一格(参数i：输入框)
+	function moveUp(i) {
+		var nextTd = $($(i).parent().parent().prev().children().get(currentCol - 1));
+		if (nextTd.length == 0) {  //到最顶一格了
+			inputComplete(i);
+			return ;
+		}
+		tdWrite(nextTd);
 	}
 	
-	var first = true;
-	//显示行列
-	function getPosition(i) {
-		if (first) {
-			let rows = $(i).parent().parent().prevAll().length + 1;
-			let cols = $(i).parent().prevAll().length + 1;
-			console.log("行: " + rows + "列: " + cols);
-			first = false;
-		} else {
-			first = true;
+	//移到上面一格(参数i：输入框)
+	function moveDown(i) {
+		var nextTd = $($(i).parent().parent().next().children().get(currentCol - 1));
+		if (nextTd.length == 0) {  //到最下方一格了
+			inputComplete(i);
+			return ;
 		}
+		tdWrite(nextTd);
+	}
+	
+	//移到左边一格(参数i：输入框)
+	function moveLeft(i) {
+		var nextTd = $(i).parent().prev();
+		if (nextTd.length == 0) {  //到最左一格了
+			inputComplete(i);
+			return ;
+		}
+		tdWrite(nextTd);
+	}
+	
+	//移到右边一格(参数i：输入框)
+	function moveRight(i) {
+		var nextTd = $(i).parent().next().length!=0?
+						$(i).parent().next()
+						: $(i).parent().parent().next().find("td").first();
+		if (nextTd.length == 0) {  //到最后一格了
+			//新增一行
+			let colNum = $(i).parent().prevAll().length + 1;
+			let newRow = "";
+			for (let i = 0; i < colNum; i++) {
+				newRow += '<td></td>';
+			}
+			newRow = '<tr>' + newRow + '</tr>';
+			$("#mytable").append(newRow);
+			//光标即将移到新一行起始格
+			nextTd = $(i).parent().parent().next().find("td").first();
+		}
+		tdWrite(nextTd);
+	}
+	
+	//完成输入后将输入框内容写入表格(参数i：输入框)
+	function inputComplete(i) {
+		$(i).parent().html(i.value);
+		// $("#showPos").html("");
+		$("#showModifyPos").html("");
+	}
+	
+	// var currentRow;
+	var currentCol;
+	//显示行列(参数i：输入框)
+	function getPosition(i) {
+		let rows = $(i).parent().parent().prevAll().length + 1;
+		// currentRow = rows;
+		let cols = $(i).parent().prevAll().length + 1;
+		currentCol = cols;
+		$("#showPos").html("当前行: " + rows + "，" + "列: " + cols);
+	}
+	
+	//显示修改中行列(参数i：输入框)
+	function getModifyPosition(i) {
+		let rows = $(i).parent().parent().prevAll().length + 1;
+		let cols = $(i).parent().prevAll().length + 1;
+		$("#showModifyPos").html("当前修改行: " + rows + "，" + "列: " + cols);
 	}
 </script>
 </html>
