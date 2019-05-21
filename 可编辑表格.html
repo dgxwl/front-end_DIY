@@ -34,6 +34,7 @@ td {
 <p id="showModifyPos" style="color: red;"></p>  <!-- 编辑时显示当前编辑位置 -->
 
 <button onclick="exportAsXlsx()">导出为excel表格</button>
+<button onclick="print()">打印表格</button>
 
 </body>
 <script>
@@ -152,12 +153,34 @@ td {
 	}
 	
 	//*****************************************************************************
+	//参考https://blog.csdn.net/quyunde/article/details/80654687
+	
+	var tableStyle = "<style>td{width:80px;height:35px;border:1px solid #0017B5;text-align:center;font-size:13px;}</style></head><body>";
 	
 	//导出为表格
 	function exportAsXlsx() {
-		let table = document.querySelector("#mytable").outerHTML;
+		let table = "<html><head><meta charset='utf-8' />"
+					+ tableStyle
+					+ document.querySelector("#mytable").outerHTML
+					+ "</body></html>";
 		let blob = new Blob([table], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
 		saveAs(blob, "export.xlsx");
+	}
+	
+	//打印
+	function print() {
+		let newWindow = window.open();
+		newWindow.focus();
+		let content = "<html><head><meta charset='utf-8'/><title>打印</title>"
+						+ tableStyle
+						+ document.querySelector("#mytable").outerHTML
+						+ "</body></html>";
+				
+		newWindow.document.write(content);
+		newWindow.print();
+		newWindow.document.close();
+		newWindow.close();
+		return false;
 	}
 </script>
 </html>
