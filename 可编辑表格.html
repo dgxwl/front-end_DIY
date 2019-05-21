@@ -13,6 +13,7 @@ td {
 }
 </style>
 <script src="js/jquery.min.js"></script>
+<script src="js/fileSaver.min.js"></script>
 </head>
 <body>
 
@@ -31,6 +32,8 @@ td {
 
 <p id="showPos"></p>  <!-- 光标移入时显示当前位置 -->
 <p id="showModifyPos" style="color: red;"></p>  <!-- 编辑时显示当前编辑位置 -->
+
+<button onclick="exportAsXlsx()">导出为excel表格</button>
 
 </body>
 <script>
@@ -83,7 +86,7 @@ td {
 		tdWrite(nextTd);
 	}
 	
-	//移到上面一格(参数i：输入框)
+	//移到下面一格(参数i：输入框)
 	function moveDown(i) {
 		var nextTd = $($(i).parent().parent().next().children().get(currentCol - 1));
 		if (nextTd.length == 0) {  //到最下方一格了
@@ -146,6 +149,15 @@ td {
 		let rows = $(i).parent().parent().prevAll().length + 1;
 		let cols = $(i).parent().prevAll().length + 1;
 		$("#showModifyPos").html("当前修改行: " + rows + "，" + "列: " + cols);
+	}
+	
+	//*****************************************************************************
+	
+	//导出为表格
+	function exportAsXlsx() {
+		let table = document.querySelector("#mytable").outerHTML;
+		let blob = new Blob([table], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+		saveAs(blob, "export.xlsx");
 	}
 </script>
 </html>
