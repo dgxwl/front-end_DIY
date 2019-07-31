@@ -11,9 +11,13 @@ td {
 	text-align: center;
 	font-size: 13px;
 }
+
+.selected {
+	border: 2px solid #000055;
+}
 </style>
-<script src="js/jquery.min.js"></script>
-<script src="js/fileSaver.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery"></script>
+<script src="https://cdn.bootcss.com/FileSaver.js/2014-11-29/FileSaver.min.js"></script>
 </head>
 <body>
 
@@ -38,6 +42,8 @@ td {
 
 </body>
 <script>
+	var lastSelected = null;
+
 	//单元格点击事件
 	function toInput(e) {
 		e.stopPropagation();
@@ -46,6 +52,15 @@ td {
 			return ;
 		}
 		var td = $(obj);
+		
+		if (lastSelected != null) {
+			lastSelected.removeClass("selected");
+			lastSelected = td;
+		} else {
+			lastSelected = td;
+		}
+		td.addClass("selected");
+		
 		tdWrite(td);
 	}
 	
